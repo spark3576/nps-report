@@ -11,13 +11,15 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:#f0f4f
 h1{font-size:24px;color:#0d47a1;margin-bottom:8px}
 .sub{color:#666;font-size:13px;margin-bottom:32px}
 .links{display:flex;flex-direction:column;gap:14px}
-a{display:block;padding:16px 24px;background:#fff;border-radius:12px;text-decoration:none;color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all .2s}
-a:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+a.main-link{display:block;padding:16px 24px;background:#fff;border-radius:12px;text-decoration:none;color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all .2s}
+a.main-link:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
 .title{font-size:15px;font-weight:700;color:#0d47a1}
 .desc{font-size:11px;color:#888;margin-top:4px}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;margin-left:6px}
 .b1{background:#e3f2fd;color:#1565c0}
 .b2{background:#fce4ec;color:#c62828}
+.archive{margin-top:28px;text-align:left;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.archive-title{font-size:13px;font-weight:700;color:#333;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:6px}
 .footer{margin-top:32px;font-size:9px;color:#aaa}
 </style>
 </head>
@@ -26,14 +28,18 @@ a:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
 <h1>국민연금 국내주식 분석</h1>
 <div class="sub">2026.04.13 기준 | 1,143종목 · 212.6조원 | DART변동 284종목</div>
 <div class="links">
-<a href="index.html">
+<a class="main-link" href="index.html">
   <div class="title">전체 분석 보고서 <span class="badge b1">Full Report</span></div>
   <div class="desc">포트폴리오 현황, 섹터분석, P&L, 종목별 상세, 전망</div>
 </a>
-<a href="brief.html">
+<a class="main-link" href="brief.html">
   <div class="title">임원 브리핑 <span class="badge b2">A4 2p</span></div>
   <div class="desc">핵심 KPI, Top10 종목, 수익률 상하위, 리스크, 시사점</div>
 </a>
+</div>
+<div class="archive">
+<div class="archive-title">이전 보고서</div>
+<a href="archive/2026-04-13/index.html" style="font-size:12px;color:#1565c0;text-decoration:none;padding:4px 0;display:block">2026-04-13</a><a href="archive/2026-04-12/index.html" style="font-size:12px;color:#1565c0;text-decoration:none;padding:4px 0;display:block">2026-04-12</a>
 </div>
 <div class="footer">NPS DART 분석 시스템 v2.0 | 공개 데이터 기반 자동 생성</div>
 </div>
