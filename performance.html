@@ -50,19 +50,37 @@ ul{margin:6px 0 6px 18px}li{margin:3px 0;font-size:12.5px}
 <b>다만 그대로 믿으면 안 됩니다.</b> 매수 바스켓의 중위 평가액이 2,276억, 매도가 862억으로 <b>2.64배</b> 차이입니다.
 매수 판정이 큰 종목에 쏠려 있는데 이번 구간은 대형주가 선방한 장이었습니다.
 스프레드의 상당 부분이 종목선별력이 아니라 <b>사이즈 팩터 노출</b>일 수 있어 아래에서 검정했습니다.</div>
-<h3>사이즈 중립화 검정 — 스프레드가 규모 효과인가</h3>
-<div class="note">평가액 3분위(경계 664억 / 2,704억)로 층화한 뒤 각 구간 <b>안에서</b> 매수−매도 스프레드를 다시 쟀습니다. 구간별로 살아남으면 규모로 설명되지 않는 알파입니다.</div>
-<table><tr><th>규모 구간</th><th>매수</th><th>매도</th><th>스프레드</th><th>표본(매수/매도)</th></tr>
-<tr><td>대형</td><td><span class="neg">-21.6%</span></td><td><span class="neg">-29.8%</span></td><td><span class="pos">+8.2%p</span></td><td>43/17</td></tr>
-<tr><td>중형</td><td><span class="neg">-25.7%</span></td><td><span class="neg">-36.6%</span></td><td><span class="pos">+11.0%p</span></td><td>32/24</td></tr>
-<tr><td>소형</td><td><span class="neg">-30.0%</span></td><td><span class="neg">-35.4%</span></td><td><span class="pos">+5.4%p</span></td><td>25/32</td></tr>
+<h3>팩터 중립화 검정 — 스프레드가 진짜 종목선별력인가</h3>
+<div class="note">각 팩터로 층화한 뒤 <b>같은 층 안에서</b> 매수−매도 스프레드를 다시 쟀습니다. 층마다 살아남으면 그 팩터로 설명되지 않는 알파입니다. 층별 표본이 매수·매도 각 5종목 미만이면 계산에서 제외합니다 — 채점 시점이 쌓이면 유효 층이 자동으로 늘어납니다.</div>
+<table><tr><th>팩터 / 층</th><th>매수</th><th>매도</th><th>스프레드</th><th>표본</th></tr>
+<tr><td colspan="5" style="background:#f8f9fa;font-weight:700;color:#455a64">사이즈 <span style="font-weight:400;font-size:11px">(평가액(억원)) — 중립화 +8.2%p · 유효 3층 · 전 층 +</span></td></tr>
+<tr><td>　대형</td><td><span class="neg">-21.6%</span></td><td><span class="neg">-29.8%</span></td><td><span class="pos">+8.2%p</span></td><td>43/17</td></tr>
+<tr><td>　소형</td><td><span class="neg">-30.0%</span></td><td><span class="neg">-35.4%</span></td><td><span class="pos">+5.4%p</span></td><td>25/32</td></tr>
+<tr><td>　중형</td><td><span class="neg">-25.7%</span></td><td><span class="neg">-36.6%</span></td><td><span class="pos">+11.0%p</span></td><td>32/24</td></tr>
+<tr><td colspan="5" style="background:#f8f9fa;font-weight:700;color:#455a64">섹터 <span style="font-weight:400;font-size:11px">(GICS 섹터) — 중립화 +5.3%p · 유효 3층 · 전 층 +</span></td></tr>
+<tr><td>　경기소비재</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　금융</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　기타</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　산업재</td><td><span class="neg">-35.1%</span></td><td><span class="neg">-40.8%</span></td><td><span class="pos">+5.7%p</span></td><td>22/18</td></tr>
+<tr><td>　소재</td><td><span class="neg">-32.3%</span></td><td><span class="neg">-39.7%</span></td><td><span class="pos">+7.4%p</span></td><td>19/13</td></tr>
+<tr><td>　에너지</td><td colspan="4" style="text-align:left;color:#999">가격 미확보</td></tr>
+<tr><td>　유틸리티</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　정보기술</td><td><span class="neg">-28.0%</span></td><td><span class="neg">-30.8%</span></td><td><span class="pos">+2.8%p</span></td><td>13/17</td></tr>
+<tr><td>　커뮤니케이션</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　필수소비재</td><td colspan="4" style="text-align:left;color:#999">층별 표본 5종목 미만</td></tr>
+<tr><td>　헬스케어</td><td colspan="4" style="text-align:left;color:#999">가격 미확보</td></tr>
+<tr><td colspan="5" style="background:#f8f9fa;font-weight:700;color:#455a64">모멘텀 <span style="font-weight:400;font-size:11px">(직전 60거래일 수익률(%)) — 중립화 +7.4%p · 유효 3층 · 전 층 +</span></td></tr>
+<tr><td>　강세</td><td><span class="neg">-35.7%</span></td><td><span class="neg">-40.2%</span></td><td><span class="pos">+4.5%p</span></td><td>26/11</td></tr>
+<tr><td>　약세</td><td><span class="neg">-21.9%</span></td><td><span class="neg">-30.3%</span></td><td><span class="pos">+8.4%p</span></td><td>17/26</td></tr>
+<tr><td>　중립</td><td><span class="neg">-25.4%</span></td><td><span class="neg">-34.6%</span></td><td><span class="pos">+9.3%p</span></td><td>22/14</td></tr>
 </table>
-<div class="key"><b>규모 효과가 아니라 실제 선별력입니다.</b>
-층화 후 평균 스프레드가 <b>+8.2%p</b>로, 층화 전 +9.5%p 중 규모로 설명되는 몫은
-<b>+1.3%p(약 14%)</b>에 불과합니다.
-게다가 <b>대형·중형·소형 세 구간 모두에서 스프레드가 양(+)</b>입니다.
-앞서 제기한 사이즈 편중 우려는 이 검정으로 해소됩니다.
-다만 여전히 단일 구간 결과이며, 섹터·모멘텀 등 다른 팩터는 중립화하지 않았습니다.</div>
+<div class="key"><b>사이즈 효과가 아니라 실제 선별력입니다.</b>
+층화 전 전체 스프레드 +9.5%p 중 규모로 설명되는 몫은
+<b>+1.3%p(약 14%)</b>에 불과하고, 중립화 후에도 <b>+8.2%p</b>가 남습니다.
+세 규모 구간 모두에서 스프레드가 양(+)입니다.<br><br>
+섹터·모멘텀 층화 결과도 위 표에 함께 두었습니다. 층별 표본이 얇은 구간은 '표본부족'으로 표시되며,
+매월 채점이 쌓이면 별도 작업 없이 유효 층이 늘어납니다. 다만 현재는 여전히 <b>단일 관측 구간</b>이며,
+여러 시점에서 반복 확인되기 전까지는 확정적으로 읽지 마십시오.</div>
 <h2>C7. 국민연금 매매 방향을 따라갈 근거가 있는가</h2>
 <table><tr><th>항목</th><th>04/12</th><th>04/13</th><th>04/15</th><th>05/01</th></tr><tr><td>NPS 추가취득 종목</td><td><span class="pos">+0.9%</span></td><td><span class="pos">+0.9%</span></td><td><span class="pos">+0.6%</span></td><td><span class="pos">+0.2%</span></td></tr><tr><td>NPS 일부처분 종목</td><td><span class="neg">-0.9%</span></td><td><span class="neg">-0.9%</span></td><td><span class="neg">-0.7%</span></td><td><span class="neg">-0.2%</span></td></tr></table>
 <div class="key"><b>근거가 약합니다.</b> 추가취득 종목과 일부처분 종목의 차이가
@@ -112,7 +130,8 @@ KOSPI를 잣대로 두면 <b>섹터 ETF(-6~-16%p), 모델 Core(-4~-11%p), 손익
 실측 결과 접수일까지 <b>중앙값 26일, 평균 35.7일</b> 지연되고 31일 이상이 44%입니다.
 즉 <b>실제 매매는 공시 훨씬 이전</b>에 일어납니다.</div>
 <h3>원점 = 보고서작성기준일 (국민연금이 실제로 사고판 시점 근사)</h3>
-<table><tr><th>구분</th><th>T-10</th><th>T-5</th><th>T-3</th><th>T-1</th><th>T+0</th><th>T+1</th><th>T+3</th><th>T+5</th><th>T+10</th><th>T+20</th><th>T+40</th><th>T+60</th></tr><tr><td>NPS 추가취득 (84건)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>NPS 일부처분 (60건)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><b>스프레드 (취득−처분)</b></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>승률 — 추가취득</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>승률 — 일부처분</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></table>
+<div class="note">표본 <b>253건</b> (202510~202603) · 신뢰도 <b>유의미</b>. 이벤트 원장(<code>events.jsonl</code>)에 누적되며 매월 실행 시 표본이 자동으로 늘어납니다.</div>
+<table><tr><th>구분</th><th>T-10</th><th>T-5</th><th>T-3</th><th>T-1</th><th>T+0</th><th>T+1</th><th>T+3</th><th>T+5</th><th>T+10</th><th>T+20</th><th>T+40</th><th>T+60</th></tr><tr><td>NPS 추가취득 (129건)</td><td><span class="neg">-6.2</span></td><td><span class="neg">-4.1</span></td><td><span class="neg">-2.6</span></td><td><span class="neg">-1.2</span></td><td><span class="neg">+0.0</span></td><td><span class="neg">-0.3</span></td><td><span class="neg">-0.2</span></td><td><span class="neg">-0.5</span></td><td><span class="neg">-2.6</span></td><td><span class="neg">-4.4</span></td><td><span class="neg">-10.7</span></td><td><span class="neg">-22.7</span></td></tr><tr><td>NPS 일부처분 (124건)</td><td><span class="pos">+3.7</span></td><td><span class="pos">+1.5</span></td><td><span class="pos">+0.9</span></td><td><span class="pos">+0.3</span></td><td><span class="neg">+0.0</span></td><td><span class="pos">+0.3</span></td><td><span class="pos">+0.6</span></td><td><span class="pos">+0.7</span></td><td><span class="pos">+1.5</span></td><td><span class="pos">+2.0</span></td><td><span class="pos">+1.7</span></td><td><span class="neg">-0.6</span></td></tr><tr><td><b>스프레드 (취득−처분)</b></td><td><span class="neg">-9.9</span></td><td><span class="neg">-5.6</span></td><td><span class="neg">-3.4</span></td><td><span class="neg">-1.6</span></td><td><span class="neg">+0.0</span></td><td><span class="neg">-0.6</span></td><td><span class="neg">-0.8</span></td><td><span class="neg">-1.2</span></td><td><span class="neg">-4.1</span></td><td><span class="neg">-6.5</span></td><td><span class="neg">-12.4</span></td><td><span class="neg">-22.1</span></td></tr><tr><td>승률 — 추가취득</td><td>38%</td><td>37%</td><td>38%</td><td>38%</td><td>0%</td><td>41%</td><td>44%</td><td>47%</td><td>39%</td><td>39%</td><td>37%</td><td>32%</td></tr><tr><td>승률 — 일부처분</td><td>62%</td><td>56%</td><td>60%</td><td>58%</td><td>0%</td><td>52%</td><td>54%</td><td>50%</td><td>54%</td><td>55%</td><td>60%</td><td>51%</td></tr></table>
 <div class="key"><b>국민연금은 역추세로 매매합니다.</b><br>
 국민연금이 <b>사들인</b> 종목은 기준일 직전 10거래일에 <b>−7.91%</b> 하락해 있었고,
 <b>판</b> 종목은 <b>+4.35%</b> 올라 있었습니다. 스프레드 <b>−12.26%p</b>.
@@ -122,7 +141,8 @@ KOSPI를 잣대로 두면 <b>섹터 ETF(-6~-16%p), 모델 Core(-4~-11%p), 손익
 다만 국민연금의 목적은 알파 창출이 아니라 비중 유지이므로 '틀렸다'고 평가할 대상은 아닙니다.
 <b>추종 전략의 근거가 없다</b>는 것이 정확한 결론이며, C7 결과와 일관됩니다.</div>
 <h3>원점 = 접수일 (투자자가 정보를 알게 되어 따라 살 수 있는 시점)</h3>
-<table><tr><th>구분</th><th>T-10</th><th>T-5</th><th>T-3</th><th>T-1</th><th>T+0</th><th>T+1</th><th>T+3</th><th>T+5</th><th>T+10</th><th>T+20</th><th>T+40</th><th>T+60</th></tr><tr><td>NPS 추가취득 (84건)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>NPS 일부처분 (59건)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><b>스프레드 (취득−처분)</b></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>승률 — 추가취득</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>승률 — 일부처분</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></table>
+<div class="note">표본 <b>251건</b> (202601~202604) · 신뢰도 <b>유의미</b>. 이벤트 원장(<code>events.jsonl</code>)에 누적되며 매월 실행 시 표본이 자동으로 늘어납니다.</div>
+<table><tr><th>구분</th><th>T-10</th><th>T-5</th><th>T-3</th><th>T-1</th><th>T+0</th><th>T+1</th><th>T+3</th><th>T+5</th><th>T+10</th><th>T+20</th><th>T+40</th><th>T+60</th></tr><tr><td>NPS 추가취득 (129건)</td><td><span class="neg">-2.2</span></td><td><span class="pos">+1.2</span></td><td><span class="pos">+1.1</span></td><td><span class="pos">+0.3</span></td><td><span class="neg">+0.0</span></td><td><span class="neg">-1.0</span></td><td><span class="neg">-3.0</span></td><td><span class="neg">-5.1</span></td><td><span class="neg">-4.0</span></td><td><span class="neg">-1.8</span></td><td><span class="neg">-28.5</span></td><td><span class="neg">-33.1</span></td></tr><tr><td>NPS 일부처분 (122건)</td><td><span class="neg">-4.3</span></td><td><span class="neg">-0.9</span></td><td><span class="neg">-0.1</span></td><td><span class="neg">-0.3</span></td><td><span class="neg">+0.0</span></td><td><span class="neg">-0.7</span></td><td><span class="neg">-1.7</span></td><td><span class="neg">-2.3</span></td><td><span class="neg">-0.2</span></td><td><span class="pos">+4.6</span></td><td><span class="neg">-5.5</span></td><td><span class="neg">-3.2</span></td></tr><tr><td><b>스프레드 (취득−처분)</b></td><td><span class="pos">+2.1</span></td><td><span class="pos">+2.1</span></td><td><span class="pos">+1.2</span></td><td><span class="pos">+0.5</span></td><td><span class="neg">+0.0</span></td><td><span class="neg">-0.3</span></td><td><span class="neg">-1.3</span></td><td><span class="neg">-2.9</span></td><td><span class="neg">-3.8</span></td><td><span class="neg">-6.5</span></td><td><span class="neg">-22.9</span></td><td><span class="neg">-29.9</span></td></tr><tr><td>승률 — 추가취득</td><td>42%</td><td>55%</td><td>62%</td><td>61%</td><td>0%</td><td>34%</td><td>34%</td><td>27%</td><td>31%</td><td>42%</td><td>21%</td><td>25%</td></tr><tr><td>승률 — 일부처분</td><td>36%</td><td>51%</td><td>53%</td><td>58%</td><td>0%</td><td>34%</td><td>30%</td><td>30%</td><td>47%</td><td>66%</td><td>39%</td><td>39%</td></tr></table>
 <div class="key"><b>공시 보고 따라 사면 늦습니다.</b><br>
 공시 후 스프레드가 T+1 −0.31%p → T+5 <b>−3.30%p</b> → T+20 <b>−5.57%p</b>로 계속 벌어집니다.
 추가취득 종목은 T+5까지 −5.81%, <b>승률 21%</b>에 그칩니다.<br><br>
@@ -134,10 +154,25 @@ KOSPI를 잣대로 두면 <b>섹터 ETF(-6~-16%p), 모델 Core(-4~-11%p), 손익
 표본 중위 β가 1보다 낮아(0.53~0.85) 시장모형이 이 급락을 제대로 설명하지 못합니다.
 <b>신뢰 구간은 T-10 ~ T+20</b>입니다.</div>
 <h2>E14. 누적 적중률 시계열</h2>
-<div class="note">현재 채점 시점이 <b>1개</b>라 시계열을 그릴 수 없습니다.
-성과 기록은 <code>output/performance/scorecard.jsonl</code>에 append-only로 누적되며,
-월간 파이프라인이 돌 때마다 한 시점씩 쌓입니다. 이 항목만은 소급 생성이 불가능해
-지금부터 기록을 시작했습니다. 채점 시점이 6개(약 반년) 쌓이면 항목별 적중률 추이를 제시합니다.</div>
+<table><tr><th>항목</th><th>07/28</th><th>추세</th></tr>
+<tr><td>롱숏 스프레드 (매수−매도)</td><td><span class="pos">+9.5%p</span></td><td>—</td></tr>
+<tr><td>Top10 보유종목 (평가액가중)</td><td><span class="pos">+9.0%p</span></td><td>—</td></tr>
+<tr><td>Top10 보유종목 (동일가중)</td><td><span class="pos">+0.2%p</span></td><td>—</td></tr>
+<tr><td>섹터별 매칭 ETF</td><td><span class="neg">-6.0%p</span></td><td>—</td></tr>
+<tr><td>모델 A — 핵심(Core)</td><td><span class="neg">-4.0%p</span></td><td>—</td></tr>
+<tr><td>모델 B — 간편(Simple)</td><td><span class="neg">-1.0%p</span></td><td>—</td></tr>
+<tr><td>모델 C — 배당강화</td><td><span class="pos">+6.0%p</span></td><td>—</td></tr>
+<tr><td>손익비 Top20 매수추천</td><td><span class="neg">-4.8%p</span></td><td>—</td></tr>
+</table>
+<h3>채점 시점별 적중률 — 지수를 이긴 추천 항목의 비율</h3>
+<table><tr><th>채점 시점</th><th>평가 항목</th><th>KOSPI 상회</th><th>적중률</th></tr>
+<tr><td>2026.07.28</td><td>28</td><td>9</td><td>32%</td></tr>
+</table>
+<div class="note">채점 시점이 <b>1개</b> 쌓였습니다.
+성과 기록은 <code>output/performance/scorecard.jsonl</code>에 append-only로 누적되고
+월간 파이프라인이 돌 때마다 한 시점씩 자동으로 늘어납니다 — 위 표의 열이 매달 하나씩 붙습니다.
+방향성을 논하려면 최소 6개 시점이 필요하며 <b>5회</b> 더 쌓여야 합니다.
+이 항목은 소급 생성이 불가능하므로 기록 자체가 자산입니다.</div>
 <h2>방법론과 한계</h2>
 <ul>
 <li><b>진입가 규칙</b> — 추천일이 휴장이면 다음 거래일 종가로 진입합니다. 실제로 05/01 보고서는 04/30 종가를 표시했는데
