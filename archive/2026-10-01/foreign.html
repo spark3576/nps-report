@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>국민연금 미국 상장주식 보유 변화</title>
+<meta name="sg-scaffold" content="v7.4">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   신세계 브랜드 스타일 — 보고서 골격 v7
+   이 파일을 복사해 <template id="src"> 안의 내용만 채웁니다.
+   면 나눔은 화면에서 실시간으로 계산되므로 원고에 면을 나누지 않습니다.
+   검증: node scripts/audit_layout.js <파일> · python3 scripts/validate_output.py <파일>
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 토큰 ────────────────────────────────────────────────────── */
+:root{
+  --sg-ink-0:#FFFFFF; --sg-ink-50:#F8F8F8; --sg-ink-100:#F2F2F2;
+  --sg-ink-200:#E5E5E5; --sg-ink-300:#C6C6CE; --sg-ink-400:#9D9DA9;
+  --sg-ink-500:#7C7C7C; --sg-ink-700:#4F5556; --sg-ink-900:#403E40;
+  --sg-gold-300:#BEAA88; --sg-gold-500:#A0804D; --sg-gold-700:#78603A;
+  --sg-red-500:#DA2128;
+
+  --sg-bg-base:var(--sg-ink-0); --sg-bg-subtle:var(--sg-ink-50);
+  --sg-bg-panel:var(--sg-ink-500);          /* 장 표지 하단 회색 면. 문자색 금지 */
+  --sg-text-primary:var(--sg-ink-900);
+  --sg-text-secondary:var(--sg-ink-700);    /* 푸터·캡션·출처 */
+  --sg-text-accent:var(--sg-gold-700);      /* 본문 크기 강조 */
+  --sg-display-accent:var(--sg-gold-500);   /* 18pt 이상 표제·장 번호 */
+  --sg-text-on-dark:#FFFFFF;
+  --sg-border-hairline:var(--sg-ink-200);
+  --sg-border-rule:var(--sg-gold-300);
+
+  --sg-font-kr:"Shinsegae Sans-serif","Pretendard",-apple-system,"Malgun Gothic",sans-serif;
+  --sg-font-en:"EverydayGothic","Inter",system-ui,sans-serif;
+
+  --page-w:794px; --page-h:1123px;          /* A4 세로. 가로는 JS가 교체 */
+  --page-px:56px; --page-pt:48px; --page-pb:56px;
+  --crumb-rule:64px; --sec-dash:24px;       /* 층위 구분 — 값 고정 */
+  --band-min:.20;                            /* 장 표지 회색 면 높이 하한 */
+  --flow-gap:56px;                           /* 연속형 묶음 간격 — 단일 리듬 */
+  --flow-chapter-gap:88px;                   /* 연속형 장 사이 간격 */
+  --rail-w:196px;                            /* 연속형 좌측 목차 레일 폭 */
+  --rail-gap:56px;
+  --flow-measure:760px;                      /* 연속형 본문 폭 */
+  --rail-head:28px;                          /* 레일 머리 상자 높이 — 본문 첫 선 정렬 기준 */
+  --bar-top:12px;                            /* 도구 막대 상단. 호스트 헤더가 있으면 JS가 내립니다 */
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --sg-ink-0:#121212; --sg-ink-50:#1B1B1B; --sg-ink-100:#232323;
+  --sg-ink-200:#2E2E2E; --sg-ink-300:#5A5A62; --sg-ink-400:#A8A8B2;
+  --sg-ink-500:#8A8A8A; --sg-ink-700:#B8BCBD; --sg-ink-900:#EDEDED;
+  --sg-gold-300:#7A6440; --sg-gold-500:#C4A87A; --sg-gold-700:#D9C39A;
+  --sg-red-500:#E85560; --sg-bg-panel:#3A3A3A;
+  --sg-border-hairline:#2E2E2E; --sg-border-rule:#7A6440;
+}}
+:root[data-theme="dark"]{
+  --sg-ink-0:#121212; --sg-ink-50:#1B1B1B; --sg-ink-100:#232323;
+  --sg-ink-200:#2E2E2E; --sg-ink-300:#5A5A62; --sg-ink-400:#A8A8B2;
+  --sg-ink-500:#8A8A8A; --sg-ink-700:#B8BCBD; --sg-ink-900:#EDEDED;
+  --sg-gold-300:#7A6440; --sg-gold-500:#C4A87A; --sg-gold-700:#D9C39A;
+  --sg-red-500:#E85560; --sg-bg-panel:#3A3A3A;
+  --sg-border-hairline:#2E2E2E; --sg-border-rule:#7A6440;
+}
+
+*{box-sizing:border-box}
+/* 한글은 CSS 기본값에서 어느 글자에서나 꺾입니다. 어절 단위로 끊어야
+   「벤치마 / 크」 같은 낱말 중간 줄바꿈이 생기지 않습니다. */
+body{margin:0;background:var(--sg-bg-subtle);color:var(--sg-text-primary);
+  font-family:var(--sg-font-kr);font-size:10.5pt;line-height:1.62;
+  font-variant-numeric:tabular-nums;word-break:keep-all;
+  -webkit-text-size-adjust:100%}
+h1,h2,h3,h4{text-wrap:balance;margin:0}          /* 제목은 줄 길이를 고르게 */
+p,li,dd{text-wrap:pretty}                        /* 본문은 마지막 줄 고아 낱말 방지 */
+
+/* ── 면 상자 ─────────────────────────────────────────────────── */
+.page{position:relative;display:flow-root;                 /* 여백 상쇄 차단 */
+  width:var(--page-w);min-height:var(--page-h);margin:0 auto 16px;
+  padding:var(--page-pt) var(--page-px) var(--page-pb);
+  background:var(--sg-bg-base);border:1px solid var(--sg-border-hairline);
+  page-break-after:always;overflow:hidden;
+  container-type:inline-size;container-name:sheet}  /* 자식은 판면 폭에 반응합니다 */
+.pbody{display:flow-root}
+/* 면 나눔 계산이 끝난 뒤에만 켭니다. 계산 중에 켜면 높이가 잘못 측정됩니다. */
+body.paged-done .page{content-visibility:auto;
+  contain-intrinsic-size:auto var(--page-w) auto var(--page-h)}
+
+/* ── 연속형 — 면 개념을 버리고 내용 리듬으로 재구성합니다 ────────
+   면 상자마다 여백을 주면 앞 면의 하단 여백과 뒤 면의 상단 여백이 겹쳐
+   이음매가 들쭉날쭉해집니다. 연속형에서는 면 상자의 여백을 0으로 두고
+   간격을 두 값(면 56px · 장 88px)으로만 부여합니다. */
+body[data-view="flow"]{background:var(--sg-bg-base)}
+body[data-view="flow"] .page{width:auto;max-width:none;min-height:0;border:0;
+  margin:0;padding:0;page-break-after:auto;overflow:visible;background:transparent;
+  content-visibility:visible}
+body[data-view="flow"] .page+.page{margin-top:var(--flow-gap)}
+body[data-view="flow"] .page.toc{display:none}   /* 좌측 레일이 목차를 대신합니다 */
+/* 면 단위 반복 요소는 A4 전용입니다. 면이 없는 화면에서는 역할이 없고,
+   장 표지와 좌측 레일이 같은 정보를 이미 표시합니다. */
+body[data-view="flow"] .crumb,
+body[data-view="flow"] .crule{display:none}
+body[data-view="flow"] .grp{margin-bottom:var(--flow-gap)}
+body[data-view="flow"] .grp:last-child{margin-bottom:0}
+
+/* 면 하단 — 좌하단 푸터 · 우하단 면 번호. 번호는 계산 결과만 들어갑니다. */
+.foot{position:absolute;left:var(--page-px);right:var(--page-px);
+  bottom:calc(var(--page-pb) / 2.4);display:flex;justify-content:space-between;
+  font-size:9pt;color:var(--sg-text-secondary)}
+.foot .pg{font-family:var(--sg-font-en)}
+body[data-view="flow"] .foot{display:none}
+
+/* ── 표지 ────────────────────────────────────────────────────── */
+/*  표제 32pt — 한글 표제는 글자당 폭이 넓어 44pt에서 3줄이 됩니다.
+    사양표의 44~54pt는 영문 표제 기준입니다. output-formats.md 참조. */
+.cover{display:flex;flex-direction:column;padding-top:calc(var(--page-h) * .155)}
+.cover .issuer{font-size:9pt;font-weight:700;letter-spacing:.04em}
+.cover h1{font-size:32pt;font-weight:300;line-height:1.2;margin:0 0 20px}
+.cover .rule{height:1.5px;width:33%;background:var(--sg-border-rule);margin-bottom:20px}
+.cover .sub{font-size:12pt;font-weight:300;color:var(--sg-text-secondary);margin:0}
+.cover .meta{margin-top:auto;font-size:9pt;color:var(--sg-text-secondary)}
+/* ── 연속형 헤드라인 ─────────────────────────────────────────────
+   연속형에서 표지는 본문 열 안이 아니라 문서 맨 위 전폭 블록으로 놓입니다.
+   좌측 레일과 본문 2단은 그 아래에서 시작하며, 스크롤하면 헤드라인은
+   그대로 흘러가고 레일만 sticky로 남습니다. */
+#masthead{display:none}
+body[data-view="flow"] #masthead{display:block;
+  max-width:calc(var(--rail-w) + var(--rail-gap) + var(--flow-measure) + 48px);
+  margin:0 auto;padding:40px 24px 0}
+body[data-view="flow"] #masthead .cover{padding:0 0 36px;min-height:0;
+  border-bottom:1px solid var(--sg-border-hairline)}
+body[data-view="flow"] #masthead .cover h1{font-size:34pt;max-width:720px}
+body[data-view="flow"] #masthead .cover .sub{max-width:700px}
+body[data-view="flow"] #masthead .cover .meta{margin-top:36px;padding-top:18px;
+  border-top:1px solid var(--sg-border-hairline)}
+body[data-view="flow"] #shell{padding-top:44px}
+
+/* 레일 머리 구분선과 본문 첫 구분선을 같은 높이에 둡니다.
+   두 열의 시작선이 어긋나면 2단 그리드가 정렬되지 않은 것으로 읽힙니다.
+   레일 머리 상자 높이(--rail-head)만큼 본문 열을 내려 두 선을 일치시킵니다. */
+body[data-view="flow"] #doc-root{padding-top:var(--rail-head)}
+body[data-view="flow"] #doc-root>*:first-child,
+body[data-view="flow"] #doc-root>.page.toc+*{margin-top:0}
+@media screen and (max-width:1000px){
+  body[data-view="flow"] #masthead{padding:28px 16px 0}
+}
+@media screen and (max-width:640px){
+  body[data-view="flow"] #masthead{padding:20px 16px 0}
+  body[data-view="flow"] #masthead .cover h1{font-size:24pt;max-width:none}
+}
+@media print{#masthead{display:none!important}}
+
+/* ── 목차 ────────────────────────────────────────────────────── */
+.toc h2{margin:0 0 14px}
+.toc .rule{height:1.5px;background:var(--sg-border-rule);margin-bottom:4px}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{display:flex;justify-content:space-between;gap:24px;padding:11px 0;
+  border-bottom:1px solid var(--sg-border-hairline)}
+.toc li b{font-weight:700}
+.toc li span{color:var(--sg-text-secondary);text-align:right}
+
+/* ── 장 표지 ─────────────────────────────────────────────────── */
+/*  면 자체에는 패딩을 두지 않습니다. 상단 블록과 회색 면이 각자 패딩을 가집니다.
+    네거티브 마진으로 상쇄하는 방식은 하단 패딩이 남으므로 쓰지 않습니다.
+    장 표지에는 푸터와 면 번호를 두지 않습니다. 회색 면이 하단 변을 차지합니다. */
+.chapter{display:flex;flex-direction:column;padding:0;scroll-margin-top:24px}
+.chapter .foot{display:none}
+.chapter .top{padding:calc(var(--page-h) * .10) var(--page-px) 0}
+.chapter .no{font-family:var(--sg-font-en);font-size:72px;font-weight:300;
+  line-height:1;color:var(--sg-display-accent);margin-bottom:20px}
+.chapter .goldrule{height:1px;background:var(--sg-border-rule);margin-bottom:14px}
+.chapter h2{color:var(--sg-display-accent);margin:0 0 10px}
+.chapter .lead{font-size:11pt;color:var(--sg-text-secondary);max-width:62ch;margin:0}
+.chapter .band{margin:auto 0 0;background:var(--sg-bg-panel);color:var(--sg-text-on-dark);
+  padding:24px var(--page-px);min-height:calc(var(--page-h) * var(--band-min));
+  display:flex;flex-direction:column;justify-content:center;gap:10px}
+.chapter .band li{list-style:none;font-size:13pt;font-weight:700}
+body[data-view="flow"] .chapter{display:block;padding:0;
+  margin-top:var(--flow-chapter-gap);padding-top:28px;
+  border-top:1px solid var(--sg-border-rule)}
+body[data-view="flow"] #doc-root>.page.chapter:first-child,
+body[data-view="flow"] #doc-root>.page.toc+.page.chapter{margin-top:0}
+body[data-view="flow"] .chapter .top{padding:0}
+body[data-view="flow"] .chapter .no{font-size:52px;margin-bottom:14px}
+body[data-view="flow"] .chapter .goldrule{display:none}
+body[data-view="flow"] .chapter .band{margin:18px 0 0;padding:16px 20px;min-height:0;
+  background:var(--sg-bg-subtle);color:var(--sg-text-secondary);gap:6px}
+body[data-view="flow"] .chapter .band li{font-size:12pt;font-weight:700;
+  color:var(--sg-text-primary)}
+
+/* ── 본문 면 머리글 — 상단 가로줄을 두지 않습니다 ──────────────── */
+.crumb{font-size:9pt;color:var(--sg-text-secondary);letter-spacing:.02em;margin:0}
+.crumb+.crule{height:1.5px;width:var(--crumb-rule);background:var(--sg-border-rule);
+  margin:8px 0 18px}
+
+/* ── 제목 위계 3단 ───────────────────────────────────────────── */
+h2{font-size:19pt;font-weight:700;line-height:1.3;letter-spacing:-.015em}
+h3{font-size:15pt;font-weight:700;line-height:1.35;margin:0 0 8px;scroll-margin-top:24px}
+h3::before{content:"";display:block;width:var(--sec-dash);height:1px;
+  background:var(--sg-border-rule);margin-bottom:8px}
+h4{font-size:11.5pt;font-weight:700;margin:18px 0 6px}
+p{margin:0 0 10px}
+.lede{color:var(--sg-text-secondary);margin:0 0 16px}
+
+/* ── 수직 리듬 — 간격은 뒤 요소의 상단 여백 한 곳에서만 만듭니다 ──
+   블록마다 하단 여백을 다르게 주면 어떤 블록이 앞에 오느냐에 따라
+   간격이 갈립니다. 특히 테두리·배경·괘선으로 경계를 갖는 상자형
+   블록 바로 뒤에 제목이 오면 선이 맞붙어 읽힙니다. 상자형 블록
+   뒤의 제목은 한 단계 더 띄우며, 하한 24px을 감사기가 잽니다. ── */
+:is(p,ul,ol,.lede) + :is(h3,h4){margin-top:24px}
+:is(p,ul,ol,.lede) + h2{margin-top:32px}
+:is(.tbl-wrap,.panel,.callout,.cols,.eq,.chartbox,.steps,.split,.src,.ref,
+    table,figure) + :is(h4){margin-top:32px}
+:is(.tbl-wrap,.panel,.callout,.cols,.eq,.chartbox,.steps,.split,.src,.ref,
+    table,figure) + :is(h2,h3){margin-top:40px}
+/* 배너는 뒤따르는 내용의 머리이므로 붙여 둡니다 */
+.banner + :is(h2,h3,h4){margin-top:0}
+/* 묶음과 면의 첫 제목은 위 여백을 두지 않습니다 */
+:is(.grp,.pg-body,.sec,section,.page-head) > :is(h2,h3,h4):first-child{margin-top:0}
+
+/* ── 묶음 — 제목·리드·표·출처·해석을 한 덩어리로 이동시킵니다 ──── */
+.grp{break-inside:avoid;page-break-inside:avoid;margin-bottom:22px}
+
+/* ── 다단 — 판면 폭에 반응합니다. 용지 방향으로 분기하지 않습니다 ─ */
+.cols{display:grid;grid-template-columns:1fr;gap:16px;margin:0 0 16px}
+@container sheet (min-width:400px){.cols{grid-template-columns:repeat(2,1fr)}}
+@container sheet (min-width:600px){.cols{grid-template-columns:repeat(3,1fr)}}
+@container sheet (min-width:940px){.cols.six{grid-template-columns:repeat(6,1fr)}}
+.card{border:1px solid var(--sg-border-hairline);border-top:2px solid var(--sg-border-rule);
+  padding:14px;background:var(--sg-bg-base)}
+.card .n{font-family:var(--sg-font-en);font-size:9pt;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--sg-text-secondary);margin:0 0 6px}
+.card .v{font-family:var(--sg-font-en);font-size:17pt;font-weight:500;
+  color:var(--sg-display-accent);margin:0 0 6px;line-height:1.2}
+.card p{font-size:9.5pt;color:var(--sg-text-secondary);margin:0}
+
+/* ── 표 ──────────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl th{background:var(--sg-ink-100);color:var(--sg-text-primary);font-weight:700;
+  padding:9px 10px;border:0;border-bottom:.75pt solid var(--sg-text-primary);text-align:left}
+.tbl td{padding:8px 10px;border:0;border-bottom:.5pt solid var(--sg-border-hairline);
+  text-wrap:pretty}
+.tbl th.num,.tbl td.num{text-align:right;white-space:nowrap}
+.tbl tr.total td{border-top:1pt solid var(--sg-text-primary);
+  border-bottom:1pt solid var(--sg-text-primary);font-weight:700;background:none}
+.tbl tr.subtotal td{border-top:.5pt solid var(--sg-border-hairline);font-weight:700}
+.tbl td.muted{color:var(--sg-text-secondary)}
+.src{font-size:9pt;color:var(--sg-text-secondary);margin:8px 0 0}
+
+/* ── 배너 헤더 · 차트 패널 ───────────────────────────────────── */
+.banner{background:var(--sg-text-primary);color:var(--sg-text-on-dark);
+  padding:10px var(--page-px);margin:0 calc(-1 * var(--page-px)) 16px;
+  font-weight:700;break-after:avoid;page-break-after:avoid}
+body[data-view="flow"] .banner{margin-left:0;margin-right:0;padding:10px 20px}
+.chartbox{background:var(--sg-bg-subtle);padding:18px;break-inside:avoid}
+.chartbox svg{display:block;width:100%;height:auto}
+/* 차트 주석 — 본문이 지목하는 지점을 도표 위에 표시합니다.
+   출처가 확인된 값에만 주석을 답니다. 근거 없는 강조는 달지 않습니다. */
+.anno-dot{fill:var(--sg-red-500)}
+.anno-line{stroke:var(--sg-text-secondary);stroke-width:1;stroke-dasharray:2 2}
+.anno-txt{font-family:var(--sg-font-kr);font-size:9px;font-weight:700;
+  fill:var(--sg-text-primary)}
+.anno-sub{font-family:var(--sg-font-kr);font-size:8px;fill:var(--sg-text-secondary)}
+
+/* ── 연속형 좌측 목차 레일 ───────────────────────────────────────
+   A4는 인쇄물이므로 목차 면을 두고, 연속형은 화면 문서이므로 항상 보이는
+   레일을 둡니다. 레일 목록이 화면 가용 높이를 넘으면 현재 장만 펼칩니다.
+   내비게이션이 또 하나의 스크롤 대상이 되면 지도 구실을 못 하기 때문입니다. */
+#shell{display:block}
+body[data-view="flow"] #shell{display:grid;
+  grid-template-columns:var(--rail-w) minmax(0,var(--flow-measure));
+  gap:var(--rail-gap);justify-content:center;padding:40px 24px 96px;align-items:start}
+#rail{display:none}
+body[data-view="flow"] #rail{display:block;position:sticky;top:32px;align-self:start;
+  max-height:calc(100vh - 64px);overflow-y:auto;overscroll-behavior:contain}
+#rail .rail-h{font-family:var(--sg-font-en);font-size:10px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--sg-text-secondary);
+  line-height:17px;padding:0 0 10px;border-bottom:1px solid var(--sg-border-rule);
+  margin:0 0 6px}
+#rail a{display:block;text-decoration:none;font-size:12.5px;line-height:1.45;
+  color:var(--sg-text-secondary);padding:7px 10px 7px 12px;
+  border-left:2px solid transparent;word-break:keep-all;text-wrap:pretty}
+#rail a:hover{color:var(--sg-text-primary);background:var(--sg-bg-subtle)}
+#rail a[aria-current="true"]{color:var(--sg-text-primary);font-weight:700;
+  border-left-color:var(--sg-display-accent)}
+#rail a.lv2{font-weight:700;color:var(--sg-text-primary);margin-top:10px}
+#rail a.lv2 i{font-family:var(--sg-font-en);font-style:normal;
+  color:var(--sg-display-accent);margin-right:7px}
+#rail a.lv3{padding-left:24px}
+/* 절은 현재 읽는 장의 것만 폅니다. 창 높이로 판정하지 않으므로
+   같은 문서가 화면 크기에 따라 다른 구조로 보이지 않습니다. */
+#rail a.lv3{display:none}
+#rail a.lv3[data-open="1"]{display:block}
+/* 장 수가 많아 접은 목록도 넘칠 때의 상한 — 레일 안에서만 스크롤합니다 */
+#rail-list{max-height:calc(100vh - var(--rail-head) - 72px);overflow-y:auto}
+@media screen and (max-width:1000px){
+  :root{--rail-w:168px; --rail-gap:28px}
+  body[data-view="flow"] #shell{padding:28px 16px 72px}
+}
+@media screen and (max-width:640px){
+  body[data-view="flow"] #shell{grid-template-columns:minmax(0,1fr);gap:0;padding:20px 16px 56px}
+  body[data-view="flow"] #rail{display:none}
+}
+@media print{#rail{display:none!important}
+  #shell{display:block!important;padding:0!important}}
+
+/* ── 열람 컨트롤 — 전 산출물 공통 규격 ────────────────────────── */
+/* 두 층을 한 줄에 붙이지 않습니다. 위가 내용 층(판본), 아래가 표현 층입니다. */
+.viewbar{position:fixed;top:var(--bar-top);right:12px;z-index:50;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  max-width:calc(100vw - 24px);
+  transition:opacity 240ms cubic-bezier(.4,0,.2,1)}
+.viewbar .vb-row{display:flex;align-items:stretch;
+  background:var(--sg-bg-base);border:1px solid var(--sg-border-hairline)}
+/* 조작이 멈추면 잠시 숨겨 화면을 가리지 않습니다.
+   포인터가 올라가 있거나 초점이 안에 있으면 숨기지 않습니다. */
+.viewbar[data-idle="1"]{opacity:0;pointer-events:none}
+.viewbar .lbl{display:flex;align-items:center;padding:0 10px;
+  font-family:var(--sg-font-en);font-size:10px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--sg-text-secondary);
+  border-right:1px solid var(--sg-border-hairline);white-space:nowrap}
+.viewbar .sep{width:1px;background:var(--sg-border-hairline)}
+.viewbar .vb-row[hidden],.viewbar button[hidden]{display:none}
+.viewbar button{appearance:none;background:transparent;border:0;
+  border-bottom:2px solid transparent;padding:9px 13px;font-family:var(--sg-font-kr);
+  font-size:12px;font-weight:500;color:var(--sg-text-secondary);cursor:pointer;
+  border-radius:0;white-space:nowrap;
+  transition:color 200ms cubic-bezier(.4,0,.2,1),border-color 200ms cubic-bezier(.4,0,.2,1)}
+.viewbar button:hover{color:var(--sg-text-primary)}
+.viewbar button[aria-pressed="true"]{color:var(--sg-text-primary);
+  border-bottom-color:var(--sg-gold-500)}
+.viewbar button[disabled]{opacity:.35;cursor:default}
+.viewbar button:focus-visible{outline:2px solid var(--sg-gold-500);outline-offset:-2px}
+@media screen and (max-width:900px){
+  .viewbar{top:auto;bottom:12px;right:12px}
+  .viewbar .lbl{display:none}
+  .viewbar button{padding:8px 11px}
+}
+@media print{.viewbar{display:none}
+  .page{margin:0;border:0;box-shadow:none}}
+
+/* ── 모바일 — screen 한정. print에 새면 A4가 무너집니다 ────────── */
+@media screen and (max-width:900px){
+  body[data-view="a4"] .page{width:auto;max-width:100%;min-height:0;
+    padding:24px 20px;border:0}
+  body[data-view="a4"] .chapter{padding:0}
+  body[data-view="a4"] .chapter .top{padding:24px 20px 0}
+  body[data-view="a4"] .chapter .band{padding:18px 20px;min-height:0}
+  .cover h1{font-size:24pt}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="viewbar">
+  <div class="vb-row" id="vb-edition" role="group" aria-label="판본" hidden>
+    <span class="lbl">Edition</span>
+    <button data-ed="full">원본</button>
+    <button data-ed="brief">요약</button>
+    <button data-ed="digest">핵심</button>
+  </div>
+  <div class="vb-row" role="group" aria-label="열람 방식">
+    <span class="lbl">View</span>
+    <button data-mode="flow">연속</button>
+    <button data-mode="a4">A4</button>
+    <span class="sep"></span>
+    <button data-orient="portrait">세로</button>
+    <button data-orient="landscape">가로</button>
+  </div>
+</div>
+
+<header id="masthead"></header>
+
+<div id="shell">
+<nav id="rail" aria-label="문서 목차">
+  <p class="rail-h">Contents</p>
+  <div id="rail-list"></div>
+</nav>
+<main id="doc-root"></main>
+</div>
+
+<!-- ═══ 원고 ═══════════════════════════════════════════════════════
+     여기에 내용만 채웁니다. 면을 나누지 않고 면 번호를 적지 않습니다.
+     <template> 안에 두는 이유는 원본과 조판 결과가 DOM에 이중으로 잡히면
+     감사 계수가 두 배로 어긋나기 때문입니다.
+     ═══════════════════════════════════════════════════════════════ -->
+<template id="src">
+  <section class="page cover">
+    <p class="issuer">개인 시장 검토 자료</p>
+    <h1 style="margin-top:auto">국민연금 미국 상장주식 보유 변화</h1>
+    <div class="rule"></div>
+    <p class="sub">2025년 12월 말 → 2026년 6월 말 · 미국 증권거래위원회 분기 보유 보고서 대조</p>
+    <p class="meta">개인 시장 검토 자료 · 정보 제공 목적<br>2026년 10월 2일 작성</p>
+  </section>
+  <section class="page toc">
+    <h2>목차</h2>
+    <div class="rule"></div>
+    <ol>
+      <li><b>01 · 핵심 요약</b><span>보유 규모·종목 수·매매 방향</span></li>
+      <li><b>02 · 상위 보유 종목</b><span>평가액 상위 20종목의 보유주식수 변화</span></li>
+      <li><b>03 · 매수·매도 동향</b><span>추정 순매수·순매도, 신규 편입과 전량 매도</span></li>
+      <li><b>04 · 자료의 범위와 한계</b><span>포괄 범위·산출 방법·유의사항</span></li>
+    </ol>
+  </section>
+  <section class="page" data-only="digest" data-foot="개인 시장 검토 자료 · 정보 제공 목적">
+    <div class="grp">
+      <h3>핵심 요약</h3>
+      <p class="lede">2025년 12월 말 대비 2026년 6월 말 국민연금의 미국 상장주식 보유 변화를 정리합니다.</p>
+      <div class="cols">
+        <div class="card"><p class="n">평가액(십억 달러)</p><p class="v">155.1</p><p>2025년 12월 말 135.1 대비 +14.8%입니다.</p></div>
+        <div class="card"><p class="n">보유 종목</p><p class="v">552</p><p>신규 편입 27종목, 전량 매도 36종목입니다.</p></div>
+        <div class="card"><p class="n">매매 방향</p><p class="v">356 : 157</p><p>보유주식수를 늘린 종목과 줄인 종목의 수입니다.</p></div>
+      </div>
+      <p>추정 순매수 1위는 SPACE EXPLORATION TECHN CORP, 순매도 1위는 WESTERN DIGITAL CORP입니다. 상위 10종목이 평가액의 33.5%를 차지합니다.</p>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출).</p>
+    </div>
+  </section>
+  <section class="page chapter">
+    <div class="top"><div class="no">01</div><div class="goldrule"></div>
+      <h2>핵심 요약</h2>
+      <p class="lead">국민연금은 2026년 6월 말 기준 미국 상장주식 552종목, 1,551억 달러어치를 보유하고 있습니다.</p></div>
+    <ul class="band"><li>1.1 보유 규모와 매매 방향</li></ul>
+  </section>
+  <section class="page" data-foot="개인 시장 검토 자료 · 정보 제공 목적">
+    <p class="crumb">01 · 핵심 요약</p><div class="crule"></div>
+    <div class="grp">
+      <h3>보유 규모와 매매 방향</h3>
+      <p class="lede">평가액은 +14.8% 늘었고, 보유주식수를 늘린 종목이 줄인 종목의 약 2.3배입니다.</p>
+      <div class="cols">
+        <div class="card"><p class="n">평가액(십억 달러)</p><p class="v">135.1 → 155.1</p><p>주가 변동과 매매가 함께 반영된 수치입니다.</p></div>
+        <div class="card"><p class="n">보유 종목 수</p><p class="v">561 → 552</p><p>신규 편입 27종목, 전량 매도 36종목입니다.</p></div>
+        <div class="card"><p class="n">추정 순매수(백만 달러)</p><p class="v">+5,593</p><p>매수 8,101, 매도 2,509의 차이입니다.</p></div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>구분</th><th class="num">종목 수</th></tr></thead><tbody><tr><td>신규 편입</td><td class="num">27</td></tr><tr><td>전량 매도</td><td class="num">36</td></tr><tr><td>증가</td><td class="num">356</td></tr><tr><td>감소</td><td class="num">157</td></tr><tr><td>변동 없음</td><td class="num">9</td></tr><tr><td>식별번호 변경(기업행위)</td><td class="num">3</td></tr></tbody></table></div>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출). 옵션(풋·콜) 보유분은 제외했습니다.</p>
+    </div>
+  </section>
+  <section class="page chapter">
+    <div class="top"><div class="no">02</div><div class="goldrule"></div>
+      <h2>상위 보유 종목</h2>
+      <p class="lead">평가액 상위 10종목이 미국 상장주식 평가액의 33.5%를 차지합니다. 상위 종목 대부분에서 보유주식수가 늘었습니다.</p></div>
+    <ul class="band"><li>2.1 평가액 상위 20종목</li></ul>
+  </section>
+  <section class="page" data-foot="개인 시장 검토 자료 · 정보 제공 목적">
+    <p class="crumb">02 · 상위 보유 종목</p><div class="crule"></div>
+    <div class="grp">
+      <h3>평가액 상위 20종목</h3>
+      <p class="lede">2026년 6월 말 평가액 순이며, 증감률은 2025년 12월 말 대비 보유주식수 변화입니다.</p>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th class="num">순위</th><th>종목</th><th class="num">평가액(백만 달러)</th><th class="num">보유주식수(주)</th><th class="num">증감률(%)</th></tr></thead><tbody><tr><td class="num">1</td><td>NVIDIA CORPORATION</td><td class="num">10,171</td><td class="num">50,834,621</td><td class="num">+1.4</td></tr><tr><td class="num">2</td><td>APPLE INC</td><td class="num">9,120</td><td class="num">31,517,924</td><td class="num">+4.4</td></tr><tr><td class="num">3</td><td>MICROSOFT CORP</td><td class="num">5,685</td><td class="num">15,239,745</td><td class="num">+5.0</td></tr><tr><td class="num">4</td><td>AMAZON COM INC</td><td class="num">4,998</td><td class="num">20,970,745</td><td class="num">+5.7</td></tr><tr><td class="num">5</td><td>ALPHABET INC</td><td class="num">4,681</td><td class="num">13,098,297</td><td class="num">+5.0</td></tr><tr><td class="num">6</td><td>ALPHABET INC</td><td class="num">3,728</td><td class="num">10,550,690</td><td class="num">+1.5</td></tr><tr><td class="num">7</td><td>BROADCOM INC</td><td class="num">3,631</td><td class="num">9,612,865</td><td class="num">+5.4</td></tr><tr><td class="num">8</td><td>INVESCO EXCH TRADED FD TR II</td><td class="num">3,546</td><td class="num">47,382,366</td><td class="num">+0.0</td></tr><tr><td class="num">9</td><td>MICRON TECHNOLOGY INC</td><td class="num">3,331</td><td class="num">2,886,160</td><td class="num">-5.4</td></tr><tr><td class="num">10</td><td>ISHARES TR</td><td class="num">3,085</td><td class="num">4,119,355</td><td class="num">+0.0</td></tr><tr><td class="num">11</td><td>META PLATFORMS INC</td><td class="num">2,732</td><td class="num">4,850,873</td><td class="num">+5.3</td></tr><tr><td class="num">12</td><td>TESLA INC</td><td class="num">2,533</td><td class="num">6,022,001</td><td class="num">+6.2</td></tr><tr><td class="num">13</td><td>ADVANCED MICRO DEVICES INC</td><td class="num">2,092</td><td class="num">3,600,765</td><td class="num">+4.9</td></tr><tr><td class="num">14</td><td>ELI LILLY &amp; CO</td><td class="num">2,018</td><td class="num">1,682,782</td><td class="num">+4.2</td></tr><tr><td class="num">15</td><td>JPMORGAN CHASE &amp; CO</td><td class="num">1,817</td><td class="num">5,549,588</td><td class="num">+2.6</td></tr><tr><td class="num">16</td><td>LAM RESEARCH CORP</td><td class="num">1,457</td><td class="num">3,362,878</td><td class="num">+1.5</td></tr><tr><td class="num">17</td><td>APPLIED MATLS INC</td><td class="num">1,419</td><td class="num">1,962,051</td><td class="num">+1.4</td></tr><tr><td class="num">18</td><td>BERKSHIRE HATHAWAY INC DEL</td><td class="num">1,404</td><td class="num">2,804,925</td><td class="num">+5.6</td></tr><tr><td class="num">19</td><td>INTEL CORP</td><td class="num">1,396</td><td class="num">9,999,492</td><td class="num">+2.9</td></tr><tr><td class="num">20</td><td>JOHNSON &amp; JOHNSON</td><td class="num">1,327</td><td class="num">5,226,968</td><td class="num">+4.7</td></tr></tbody></table></div>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출). 같은 발행회사의 보통주 종류가 다르면 별도 행으로 표시됩니다.</p>
+    </div>
+  </section>
+  <section class="page chapter">
+    <div class="top"><div class="no">03</div><div class="goldrule"></div>
+      <h2>매수·매도 동향</h2>
+      <p class="lead">보유주식수 변화에 2026년 6월 말 단가를 곱해 매매 규모를 추정했습니다. 주가 변동 효과를 걸러 낸 수량 기준 지표입니다.</p></div>
+    <ul class="band"><li>3.1 추정 순매수·순매도 상위</li><li>3.2 신규 편입과 전량 매도</li></ul>
+  </section>
+  <section class="page" data-foot="개인 시장 검토 자료 · 정보 제공 목적">
+    <p class="crumb">03 · 매수·매도 동향</p><div class="crule"></div>
+    <div class="grp">
+      <h3>추정 순매수·순매도 상위</h3>
+      <p class="lede">순매수 1위는 SPACE EXPLORATION TECHN CORP(+598백만 달러), 순매도 1위는 WESTERN DIGITAL CORP(-198백만 달러)입니다.</p>
+      <div class="chartbox"><svg viewBox="0 0 760 442" role="img" aria-label="추정 순매수·순매도 상위 종목"><line x1="480.0" y1="6" x2="480.0" y2="432" style="stroke:var(--sg-ink-400);stroke-width:1"/><text x="240" y="24" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">SPACE EXPLORATION TECHN CORP</text><rect x="480.0" y="13" width="230.0" height="18" style="fill:var(--sg-ink-900)"/><text x="716.0" y="24" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+598</text><text x="240" y="50" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">APPLE INC</text><rect x="480.0" y="39" width="147.2" height="18" style="fill:var(--sg-ink-900)"/><text x="633.2" y="50" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+383</text><text x="240" y="76" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">MICROSOFT CORP</text><rect x="480.0" y="65" width="104.9" height="18" style="fill:var(--sg-ink-900)"/><text x="590.9" y="76" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+273</text><text x="240" y="102" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">AMAZON COM INC</text><rect x="480.0" y="91" width="103.3" height="18" style="fill:var(--sg-ink-900)"/><text x="589.3" y="102" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+269</text><text x="240" y="128" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">ALPHABET INC</text><rect x="480.0" y="117" width="86.5" height="18" style="fill:var(--sg-ink-900)"/><text x="572.5" y="128" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+225</text><text x="240" y="154" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">BROADCOM INC</text><rect x="480.0" y="143" width="72.0" height="18" style="fill:var(--sg-ink-900)"/><text x="558.0" y="154" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+187</text><text x="240" y="180" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">HONEYWELL AEROSPACE INC</text><rect x="480.0" y="169" width="63.8" height="18" style="fill:var(--sg-ink-900)"/><text x="549.8" y="180" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+166</text><text x="240" y="206" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">TESLA INC</text><rect x="480.0" y="195" width="56.5" height="18" style="fill:var(--sg-ink-900)"/><text x="542.5" y="206" text-anchor="start" style="font-size:12px;fill:var(--sg-text-secondary)">+147</text><text x="240" y="232" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">VISTRA CORP</text><rect x="460.3" y="221" width="19.7" height="18" style="fill:var(--sg-ink-300)"/><text x="454.3" y="232" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-51</text><text x="240" y="258" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">APPLOVIN CORP</text><rect x="456.8" y="247" width="23.2" height="18" style="fill:var(--sg-ink-300)"/><text x="450.8" y="258" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-60</text><text x="240" y="284" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">DELL TECHNOLOGIES INC</text><rect x="455.1" y="273" width="24.9" height="18" style="fill:var(--sg-ink-300)"/><text x="449.1" y="284" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-65</text><text x="240" y="310" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">CYBERARK SOFTWARE LTD</text><rect x="453.1" y="299" width="26.9" height="18" style="fill:var(--sg-ink-300)"/><text x="447.1" y="310" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-70</text><text x="240" y="336" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">CARNIVAL CORP</text><rect x="444.7" y="325" width="35.3" height="18" style="fill:var(--sg-ink-300)"/><text x="438.7" y="336" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-92</text><text x="240" y="362" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">SEAGATE TECHNOLOGY HLDNGS PL</text><rect x="419.7" y="351" width="60.3" height="18" style="fill:var(--sg-ink-300)"/><text x="413.7" y="362" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-157</text><text x="240" y="388" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">MICRON TECHNOLOGY INC</text><rect x="406.5" y="377" width="73.5" height="18" style="fill:var(--sg-ink-300)"/><text x="400.5" y="388" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-191</text><text x="240" y="414" text-anchor="end" style="font-size:13px;fill:var(--sg-text-primary)">WESTERN DIGITAL CORP</text><rect x="403.7" y="403" width="76.3" height="18" style="fill:var(--sg-ink-300)"/><text x="397.7" y="414" text-anchor="end" style="font-size:12px;fill:var(--sg-text-secondary)">-198</text></svg></div>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출). 단위는 백만 달러입니다. 진한 막대는 순매수, 옅은 막대는 순매도입니다.</p>
+    </div>
+    <div class="grp">
+      <h3>신규 편입 상위 10종목</h3>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>종목</th><th class="num">평가액(백만 달러)</th><th class="num">보유주식수(주)</th></tr></thead><tbody><tr><td>SPACE EXPLORATION TECHN CORP</td><td class="num">598</td><td class="num">3,500,000</td></tr><tr><td>HONEYWELL AEROSPACE INC</td><td class="num">166</td><td class="num">750,586</td></tr><tr><td>COHERENT CORP</td><td class="num">103</td><td class="num">262,197</td></tr><tr><td>CARNIVAL CORP LTD</td><td class="num">92</td><td class="num">3,228,771</td></tr><tr><td>LUMENTUM HLDGS INC</td><td class="num">89</td><td class="num">104,049</td></tr><tr><td>NEBIUS GROUP N.V.</td><td class="num">86</td><td class="num">312,303</td></tr><tr><td>CASEYS GEN STORES INC</td><td class="num">54</td><td class="num">67,466</td></tr><tr><td>REVOLUTION MEDICINES INC</td><td class="num">51</td><td class="num">273,604</td></tr><tr><td>FTAI AVIATION LTD</td><td class="num">50</td><td class="num">185,245</td></tr><tr><td>CURTISS WRIGHT CORP</td><td class="num">48</td><td class="num">63,928</td></tr></tbody></table></div>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출). 2026년 6월 말 평가액 순입니다.</p>
+    </div>
+    <div class="grp">
+      <h3>전량 매도 상위 10종목</h3>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>종목</th><th class="num">2025년 12월 말 평가액(백만 달러)</th><th class="num">2025년 12월 말 보유주식수(주)</th></tr></thead><tbody><tr><td>CARNIVAL CORP</td><td class="num">92</td><td class="num">3,001,300</td></tr><tr><td>CYBERARK SOFTWARE LTD</td><td class="num">70</td><td class="num">156,630</td></tr><tr><td>EQUITABLE HLDGS INC</td><td class="num">27</td><td class="num">558,782</td></tr><tr><td>UNIVERSAL HLTH SVCS INC</td><td class="num">14</td><td class="num">65,203</td></tr><tr><td>GODADDY INC</td><td class="num">11</td><td class="num">87,582</td></tr><tr><td>BAXTER INTL INC</td><td class="num">10</td><td class="num">537,185</td></tr><tr><td>PINTEREST INC</td><td class="num">8</td><td class="num">303,568</td></tr><tr><td>COTERRA ENERGY INC</td><td class="num">8</td><td class="num">291,032</td></tr><tr><td>GARTNER INC</td><td class="num">6</td><td class="num">23,042</td></tr><tr><td>HOLOGIC INC</td><td class="num">5</td><td class="num">72,883</td></tr></tbody></table></div>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출). 종목 코드 변경·합병으로 다른 이름으로 이어진 경우가 포함될 수 있습니다.</p>
+    </div>
+  </section>
+  <section class="page chapter">
+    <div class="top"><div class="no">04</div><div class="goldrule"></div>
+      <h2>자료의 범위와 한계</h2>
+      <p class="lead">이 자료는 국민연금이 미국 규제기관에 직접 보고한 미국 상장주식만 다룹니다. 해외주식 전체와는 범위가 다릅니다.</p></div>
+    <ul class="band"><li>4.1 포괄 범위와 유의사항</li></ul>
+  </section>
+  <section class="page" data-foot="개인 시장 검토 자료 · 정보 제공 목적">
+    <p class="crumb">04 · 자료의 범위와 한계</p><div class="crule"></div>
+    <div class="grp">
+      <h3>포괄 범위와 유의사항</h3>
+      <ul>
+        <li>미국 증권거래위원회 규정상 일정 규모 이상의 기관투자자는 분기 종료 후 45일 이내에 미국 상장주식 보유내역을 보고합니다. 따라서 자료는 최대 약 4개월 늦게 반영됩니다.</li>
+        <li>미국 외 시장 상장주식과 외부 위탁운용사 명의 보유분은 포함되지 않습니다. 국민연금이 공개한 2025년 말 해외주식 전체 평가액과 직접 비교할 수 없습니다.</li>
+        <li>평가액은 각 분기 말 시가 기준 달러 금액이며, 원화 환산과 이후 주가 변동은 반영하지 않았습니다.</li>
+        <li>같은 종목 안에서 보유주식수가 흔한 분할 비율(2·5·10·25배 등)만큼 늘고 1주당 단가가 크게 낮아진 경우는 주식 분할로 판정해 기준 시점 주식수를 조정했습니다. 판정은 추정이며, 해당 종목은 상위 종목 표에 표시합니다.</li>
+        <li>분할·합병·주식 병합 등으로 종목 식별번호가 바뀐 종목은 주식수를 비교할 수 없으므로 「식별번호 변경」으로 분류하고 매매 추정에서 제외했습니다.</li>
+        <li>추정 순매수·순매도는 보유주식수 변화에 최신 분기 말 단가를 곱한 값으로, 실제 거래 가격과 다릅니다.</li>
+        <li>특정 기관의 공식 의견이 아니며, 투자 판단의 근거로 사용할 수 없습니다.</li>
+      </ul>
+      <p class="src">출처 · 미국 증권거래위원회(SEC) EDGAR, 국민연금공단 Form 13F-HR (2025-12-31 기준 2026-02-10 제출, 2026-06-30 기준 2026-08-13 제출).</p>
+    </div>
+  </section>
+</template>
+
+<script>
+/* ═══ 조판 엔진 ═══════════════════════════════════════════════════
+   원고를 장 단위로 수집한 뒤 현재 용지 상자 높이에 맞춰 실시간으로
+   면을 나눕니다. 면 번호는 계산 결과로만 표시하며 원고에 적지 않습니다.
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  var KM = 'sg-view-mode', KO = 'sg-view-orient', KE = 'sg-view-edition';
+  var body = document.body;
+  var root = document.getElementById('doc-root');
+  var mast = document.getElementById('masthead');
+  var tpl  = document.getElementById('src');
+  if (!root || !tpl) return;
+
+  var FOOT = '';
+  var pageStyle = document.createElement('style');
+  document.head.appendChild(pageStyle);
+
+  function save(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+
+  /* ── 원고 수집 — 판본 필터를 조판 앞단에 둡니다 ─────────────────
+     판본은 원본 · 요약 · 핵심 세 가지입니다. data-only 에 판본 이름을
+     띄어쓰기로 나열하면 그 판본에만 실립니다.
+
+       표시 없음        원본 · 요약        (핵심에는 싣지 않습니다)
+       full             원본
+       brief            요약
+       digest           핵심
+       brief digest     요약 · 핵심
+
+     핵심 판본은 선별이 아니라 별도 집필이므로 표시 없는 요소를
+     자동으로 승계하지 않습니다. 표지만은 문서 식별자이므로 표시가
+     없으면 모든 판본에 싣습니다.
+
+     조판 엔진은 입력 배열만 달라질 뿐 그대로 동작합니다. ────────── */
+  var MODEL = [], MODELS = {}, HAS_FIG = false;
+  var EDS = ['full', 'brief', 'digest'];
+  var MARKS = {};
+  EDS.forEach(function(ed){
+    MARKS[ed] = tpl.content.querySelectorAll('[data-only~="' + ed + '"]').length;
+  });
+  var HAS = { full: true, brief: MARKS.brief > 0, digest: MARKS.digest > 0 };
+  /* 판본별 표시 건수를 문서에 남깁니다. 절 단위로 표시하면 조판 결과에
+     표시가 남지 않으므로, 감사기가 원고를 다시 읽지 않아도 되게 합니다. */
+  document.documentElement.setAttribute('data-ed-marks', JSON.stringify(MARKS));
+
+  function keep(el, ed, inherited){
+    var v = el.getAttribute && el.getAttribute('data-only');
+    /* 표시가 있는 상자 안에서는 표시 없는 요소가 상자의 표시를 따릅니다.
+       핵심 판본의 절을 통째로 표시하면 그 안의 문단마다 다시 적지
+       않아도 됩니다. */
+    if (!v) return inherited === true || ed !== 'digest';
+    return (' ' + v.replace(/\s+/g, ' ').trim() + ' ').indexOf(' ' + ed + ' ') >= 0;
+  }
+
+  /* 표시는 묶음 안쪽에도 붙으므로 하위 요소까지 내려가 걸러냅니다 */
+  function prune(node, ed){
+    if (node.querySelectorAll) {
+      Array.prototype.forEach.call(node.querySelectorAll('[data-only]'), function(e){
+        if (!keep(e, ed) && e.parentNode) e.parentNode.removeChild(e);
+      });
+    }
+    return node;
+  }
+
+  /* 내용이 빠져 제목과 출처만 남은 묶음은 싣지 않습니다 */
+  function hollow(b){
+    if (!b.classList || !b.classList.contains('grp')) return false;
+    return !Array.prototype.some.call(b.children, function(c){
+      return !/^H[1-6]$/.test(c.tagName) && !(c.classList && c.classList.contains('src'));
+    });
+  }
+
+  function collect(ed){
+    if (MODELS[ed]) return MODELS[ed];
+    var src = tpl.content, M = [];
+    HAS_FIG = src.querySelector('svg,canvas,.chartbox') !== null;
+    var f = src.querySelector('[data-foot]');
+    FOOT = f ? f.getAttribute('data-foot') : '';
+    Array.prototype.forEach.call(src.querySelectorAll('section'), function(el){
+      if (el.parentNode !== src) return;
+      /* 표시가 없는 표지는 판본과 무관하게 싣습니다. 판본마다 표지를
+         달리하려면 표지에 data-only 를 적습니다. */
+      var bare = !el.hasAttribute('data-only');
+      if (!(bare && el.classList.contains('cover')) && !keep(el, ed)) return;
+      if (el.classList.contains('chapter') || el.classList.contains('cover') ||
+          el.classList.contains('toc')) {
+        M.push({ type:'atomic', node: prune(el.cloneNode(true), ed) }); return;
+      }
+      var marked = el.hasAttribute('data-only');
+      var kids = Array.prototype.slice.call(el.children)
+        .filter(function(c){ return !c.classList.contains('foot') && keep(c, ed, marked); });
+      var crumbEl = kids[0] && kids[0].classList.contains('crumb') ? kids[0] : null;
+      var ruleEl  = kids[1] && kids[1].classList.contains('crule') ? kids[1] : null;
+      var head = (crumbEl ? crumbEl.outerHTML : '') + (ruleEl ? ruleEl.outerHTML : '');
+      var rest = kids.filter(function(c){ return c !== crumbEl && c !== ruleEl; })
+        .map(function(b){ return prune(b.cloneNode(true), ed); })
+        .filter(function(b){ return !hollow(b); });
+      if (!rest.length) return;
+      var prev = M[M.length - 1];
+      if (prev && prev.type === 'chapter' && prev.head === head) {
+        rest.forEach(function(b){ prev.blocks.push(b); });
+      } else {
+        M.push({ type:'chapter', head:head, blocks: rest });
+      }
+    });
+    /* 내용이 남지 않은 장은 장 표지까지 함께 제외해 빈 면을 남기지 않습니다 */
+    M = M.filter(function(it){ return it.type !== 'chapter' || it.blocks.length; });
+    var out = [];
+    for (var i = 0; i < M.length; i++) {
+      var it = M[i];
+      if (it.type === 'atomic' && it.node.classList.contains('chapter') &&
+          (!M[i + 1] || M[i + 1].type !== 'chapter')) continue;
+      out.push(it);
+    }
+    MODELS[ed] = out;
+    return out;
+  }
+
+  /* ── 묶음 — 제목과 뒤따르는 내용을 같은 면에 둡니다 ────────────── */
+  function isHead(n){ return n.tagName === 'H2' || n.tagName === 'H3' || n.tagName === 'H4'; }
+  function isSrc(n){ return n.classList && n.classList.contains('src'); }
+  function isPara(n){ return n.tagName === 'P' && !isSrc(n); }
+  function groupBlocks(blocks){
+    var out = [], i = 0;
+    while (i < blocks.length) {
+      var grp = [blocks[i]];
+      if (blocks[i].classList && blocks[i].classList.contains('grp')) { i++; out.push(grp); continue; }
+      if (isHead(blocks[i])) {
+        i++;
+        while (i < blocks.length && isHead(blocks[i])) { grp.push(blocks[i]); i++; }
+        if (i < blocks.length && isPara(blocks[i])) { grp.push(blocks[i]); i++; }
+        if (i < blocks.length && !isHead(blocks[i])) { grp.push(blocks[i]); i++; }
+        if (i < blocks.length && isSrc(blocks[i]))   { grp.push(blocks[i]); i++; }
+      } else {
+        i++;
+        if (i < blocks.length && isSrc(blocks[i])) { grp.push(blocks[i]); i++; }
+      }
+      out.push(grp);
+    }
+    return out;
+  }
+
+  /* ── 치수 ────────────────────────────────────────────────────── */
+  function px(v){
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v)) || 0;
+  }
+  function applySize(o){
+    var land = o === 'landscape';
+    document.documentElement.style.setProperty('--page-w', land ? '1123px' : '794px');
+    document.documentElement.style.setProperty('--page-h', land ? '794px'  : '1123px');
+    /* @page 는 런타임 주입해야 인쇄 방향이 화면 선택을 따라갑니다 */
+    pageStyle.textContent = '@page{size:A4 ' + (land ? 'landscape' : 'portrait') + ';margin:0}';
+  }
+
+  function mkPage(head, withFoot){
+    var s = document.createElement('section');
+    s.className = 'page';
+    s.innerHTML = head + '<div class="pbody"></div>' +
+      (withFoot ? '<div class="foot"><span>' + FOOT + '</span><span class="pg"></span></div>' : '');
+    s.body_ = s.querySelector('.pbody');
+    return s;
+  }
+
+  function renderFlow(){
+    var f = document.createDocumentFragment();
+    if (mast) mast.innerHTML = '';
+    MODEL.forEach(function(it){
+      if (it.type === 'atomic') {
+        var n = it.node.cloneNode(true);
+        /* 표지는 전폭 헤드라인으로 빼내 2단 그리드 위에 둡니다 */
+        if (mast && n.classList.contains('cover')) { mast.appendChild(n); return; }
+        f.appendChild(n); return;
+      }
+      var p = mkPage(it.head, false);
+      it.blocks.forEach(function(b){ p.body_.appendChild(b.cloneNode(true)); });
+      f.appendChild(p);
+    });
+    root.innerHTML = ''; root.appendChild(f);
+    body.classList.remove('paged-done');
+  }
+
+  function renderPaged(){
+    var H = px('--page-h'), PT = px('--page-pt'), PB = px('--page-pb');
+    var maxH = H - PT - PB - 6;
+    body.classList.remove('paged-done');
+    if (mast) mast.innerHTML = '';        /* A4에서는 표지가 첫 면으로 돌아갑니다 */
+    root.innerHTML = '';
+    MODEL.forEach(function(it){
+      if (it.type === 'atomic') { root.appendChild(it.node.cloneNode(true)); return; }
+      var p;
+      function newPage(){
+        var q = mkPage(it.head, true); root.appendChild(q); q.closed = false;
+        var hh = q.body_.getBoundingClientRect().top - q.getBoundingClientRect().top - PT;
+        q.limit = maxH - Math.max(hh, 0);
+        return q;
+      }
+      /* 도표를 면에 맞춰 축소합니다 — 판독성 하한은 자연 높이의 68% */
+      function fitFigure(){
+        var svg = p.body_.querySelector('svg'); if (!svg) return false;
+        var h0 = parseFloat(svg.dataset.h0 || '0');
+        if (!h0) { h0 = svg.getBoundingClientRect().height; svg.dataset.h0 = h0; }
+        var MIN = h0 * 0.68, guard = 0;
+        while (guard++ < 6) {
+          var over = p.body_.scrollHeight - p.limit;
+          if (over <= 0) return true;
+          var h = svg.getBoundingClientRect().height;
+          var nh = h - over - 5;
+          if (nh < MIN) return false;
+          svg.style.cssText += ';height:' + nh + 'px;width:auto;max-width:100%;margin:0 auto';
+        }
+        return p.body_.scrollHeight <= p.limit;
+      }
+      function put(b){
+        var n = b.cloneNode(true);
+        if (p.closed) p = newPage();
+        p.body_.appendChild(n);
+        if (p.body_.scrollHeight > p.limit) {
+          if (p.body_.children.length === 1) { p.classList.add('tall'); p.closed = true; return; }
+          p.body_.removeChild(n);
+          var prev = p.body_.lastElementChild, carry = null;
+          if (prev && isHead(prev)) { carry = prev; p.body_.removeChild(prev); }  /* 제목만 남기지 않습니다 */
+          p = newPage();
+          if (carry) p.body_.appendChild(carry);
+          p.body_.appendChild(n);
+          if (p.body_.scrollHeight > p.limit) { p.classList.add('tall'); p.closed = true; }
+        }
+      }
+      p = newPage();
+      groupBlocks(it.blocks).forEach(function(grp){
+        if (p.closed) p = newPage();
+        var before = p.body_.children.length;
+        var nodes = grp.map(function(b){ var n = b.cloneNode(true); p.body_.appendChild(n); return n; });
+        if (p.body_.scrollHeight <= p.limit) return;      /* 묶음이 그대로 들어갑니다 */
+        if (fitFigure()) return;                          /* 이 면의 도표를 줄여 맞춥니다 */
+        nodes.forEach(function(n){ p.body_.removeChild(n); });
+        if (before > 0) {                                 /* 빈 면이 아니면 새 면에서 재시도 */
+          p = newPage();
+          var n2 = grp.map(function(b){ var n = b.cloneNode(true); p.body_.appendChild(n); return n; });
+          if (p.body_.scrollHeight <= p.limit) return;
+          if (fitFigure()) return;
+          n2.forEach(function(n){ p.body_.removeChild(n); });
+        }
+        grp.forEach(put);
+      });
+    });
+    number();
+    body.classList.add('paged-done');
+  }
+
+  function number(){
+    var n = 0;
+    Array.prototype.forEach.call(root.querySelectorAll('.page'), function(el){
+      n++;
+      var pg = el.querySelector('.foot .pg');
+      if (pg) pg.textContent = (n < 10 ? '0' : '') + n;
+    });
+  }
+
+  /* ── 좌측 목차 레일 ──────────────────────────────────────────── */
+  var rail = document.getElementById('rail');
+  var railList = document.getElementById('rail-list');
+  var items = [], seq = 0;
+
+  function buildRail(){
+    items = []; railList.textContent = '';
+    Array.prototype.forEach.call(root.children, function(sec){
+      if (sec.classList.contains('cover') || sec.classList.contains('toc')) return;
+      if (sec.classList.contains('chapter')) {
+        var h2 = sec.querySelector('h2'), no = sec.querySelector('.no');
+        if (h2) items.push({ el: sec, text: h2.textContent.trim(), lv: 2,
+                             no: no ? no.textContent.trim() : '' });
+        return;
+      }
+      Array.prototype.forEach.call(sec.querySelectorAll('h3'), function(h3){
+        items.push({ el: h3, text: h3.textContent.trim(), lv: 3 });
+      });
+    });
+    if (!items.length) { rail.hidden = true; return; }
+    rail.hidden = false;
+    var chapter = null;
+    items.forEach(function(it){
+      if (!it.el.id) it.el.id = 'sec-' + (++seq);
+      if (it.lv === 2) chapter = it; else it.parent = chapter;
+      var a = document.createElement('a');
+      a.href = '#' + it.el.id;
+      a.className = it.lv === 2 ? 'lv2' : 'lv3';
+      if (it.lv === 2 && it.no) {
+        var b = document.createElement('i'); b.textContent = it.no; a.appendChild(b);
+      }
+      a.appendChild(document.createTextNode(it.text));
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        it.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + it.el.id);
+      });
+      railList.appendChild(a); it.link = a;
+    });
+    gaugeRail();
+  }
+
+  /* 레일은 항상 장만 보이고 현재 읽는 장의 절만 폅니다.
+     종전에는 목록 높이가 창을 넘을 때만 접었으나, 같은 문서가 창 크기에
+     따라 다른 구조로 보이고 문서마다 결과가 갈려 구성이 불안정했습니다.
+     판정을 없애 화면 크기·문서 길이와 무관하게 같은 구조를 유지합니다. */
+  function gaugeRail(){
+    if (body.dataset.view !== 'flow' || !items.length) return;
+    openChapter(currentChapter());
+  }
+
+  function currentChapter(){
+    var line = window.innerHeight / 3, cur = null, first = null;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].lv !== 2) continue;
+      if (!first) first = items[i];
+      if (items[i].el.getBoundingClientRect().top <= line) cur = items[i];
+    }
+    return cur || first;
+  }
+
+  function openChapter(ch){
+    items.forEach(function(it){
+      if (it.lv !== 3) return;
+      if (ch && it.parent === ch) it.link.setAttribute('data-open', '1');
+      else it.link.removeAttribute('data-open');
+    });
+  }
+
+  var ticking = false;
+  function spy(){
+    ticking = false;
+    if (body.dataset.view !== 'flow' || !items.length) return;
+    var line = window.innerHeight / 3, cur = items[0];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].el.getBoundingClientRect().top <= line) cur = items[i];
+    }
+    items.forEach(function(it){
+      if (it === cur) it.link.setAttribute('aria-current', 'true');
+      else it.link.removeAttribute('aria-current');
+    });
+    openChapter(cur.lv === 2 ? cur : cur.parent);
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking) { ticking = true; requestAnimationFrame(spy); }
+  }, { passive: true });
+
+  /* ── 상태 ────────────────────────────────────────────────────── */
+  var mode, orient, edition;
+  function narrow(){ return window.matchMedia('(max-width:900px)').matches; }
+  function autoMode(){ return narrow() ? 'flow' : 'a4'; }
+  function autoOrient(){ return HAS_FIG ? 'landscape' : 'portrait'; }
+
+  function apply(m, o, ed){
+    mode = m; orient = o; edition = HAS[ed] ? ed : 'full';
+    body.dataset.view = m; body.dataset.orient = o;
+    body.dataset.edition = edition;
+    MODEL = collect(edition);
+    applySize(o);
+    if (m === 'a4' && !narrow()) renderPaged(); else renderFlow();
+    buildRail(); spy();
+    Array.prototype.forEach.call(document.querySelectorAll('.viewbar button'), function(b){
+      if (b.dataset.mode) b.setAttribute('aria-pressed', String(b.dataset.mode === m));
+      if (b.dataset.orient) {
+        b.setAttribute('aria-pressed', String(b.dataset.orient === o));
+        if (m === 'a4') b.removeAttribute('disabled'); else b.setAttribute('disabled', '');
+      }
+      if (b.dataset.ed) b.setAttribute('aria-pressed', String(b.dataset.ed === edition));
+    });
+  }
+
+  /* 해당 판본의 내용이 없으면 단추를 그리지 않고, 원본만 있으면
+     판본 행 자체를 그리지 않습니다 */
+  var edRow = document.getElementById('vb-edition');
+  Array.prototype.forEach.call(edRow.querySelectorAll('[data-ed]'), function(b){
+    if (!HAS[b.dataset.ed]) b.setAttribute('hidden', '');
+  });
+  if (HAS.brief || HAS.digest) edRow.removeAttribute('hidden');
+
+  Array.prototype.forEach.call(document.querySelectorAll('.viewbar button'), function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.mode) { save(KM, b.dataset.mode); apply(b.dataset.mode, orient, edition); }
+      else if (b.dataset.orient) { save(KO, b.dataset.orient); apply(mode, b.dataset.orient, edition); }
+      else { save(KE, b.dataset.ed); apply(mode, orient, b.dataset.ed); }
+    });
+  });
+
+  /* ── 자동 숨김 — 조작이 멈추면 3초 뒤 숨기고 움직이면 되돌립니다 ──
+     초점이 컨트롤 안에 있으면 숨기지 않아 키보드 이동 중 가려지지
+     않습니다(WCAG 2.4.11). 페이드 시간은 동작 축소 설정을 따릅니다. */
+  var IDLE_MS = 3000, viewbar = document.querySelector('.viewbar');
+  var idleT = null, overBar = false;
+  function sleepBar(){
+    if (overBar) return;
+    /* 키보드로 들어온 초점일 때만 붙잡습니다. 클릭으로 남은 초점까지
+       붙잡으면 조작 직후 컨트롤이 영영 사라지지 않습니다. */
+    var held = false;
+    try { held = !!viewbar.querySelector(':focus-visible'); }
+    catch (e) { held = viewbar.contains(document.activeElement); }
+    if (held) return;
+    viewbar.setAttribute('data-idle', '1');
+  }
+  function wakeBar(){
+    viewbar.removeAttribute('data-idle');
+    clearTimeout(idleT); idleT = setTimeout(sleepBar, IDLE_MS);
+  }
+  viewbar.addEventListener('pointerenter', function(){ overBar = true; wakeBar(); });
+  viewbar.addEventListener('pointerleave', function(){ overBar = false; wakeBar(); });
+  viewbar.addEventListener('focusin', wakeBar);
+  viewbar.addEventListener('focusout', wakeBar);
+  ['scroll', 'pointermove', 'pointerdown', 'touchstart', 'keydown', 'wheel']
+    .forEach(function(ev){ window.addEventListener(ev, wakeBar, { passive: true }); });
+  wakeBar();
+
+  /* 호스트 헤더가 있는 환경(아티팩트 프레임)에서는 막대를 그 아래로 내립니다 */
+  var framed = true;
+  try { framed = window.self !== window.top; } catch (e) { framed = true; }
+  if (framed) document.documentElement.style.setProperty('--bar-top', '56px');
+
+  var t, wasNarrow = narrow();
+  window.addEventListener('resize', function(){
+    clearTimeout(t);
+    t = setTimeout(function(){
+      if (narrow() !== wasNarrow) { wasNarrow = narrow(); apply(mode, orient, edition); }
+      else if (mode === 'a4' && !narrow()) { renderPaged(); buildRail(); }
+      else gaugeRail();
+    }, 260);
+  });
+  window.addEventListener('beforeprint', function(){
+    if (mode === 'flow' && !narrow()) { body.dataset.view = 'a4'; renderPaged(); }
+  });
+  window.addEventListener('afterprint', function(){ if (mode === 'flow') apply('flow', orient, edition); });
+
+  apply(load(KM) || autoMode(), load(KO) || autoOrient(), load(KE) || 'full');
+})();
+</script>
